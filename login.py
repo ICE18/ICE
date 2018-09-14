@@ -1,4 +1,4 @@
-from Tkinter import *
+from Tkinter import Entry, Button, Label, Tk, FLAT, CENTER, RIDGE
 from os import path
 
 # Related functions
