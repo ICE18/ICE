@@ -3,6 +3,9 @@ try:
 except ImportError:
     import tkinter as tk
 from os import path
+from user import User
+from project import Project
+from database import db
 
 # Related functions
 def lock ():
@@ -15,12 +18,16 @@ def new ():
 	with open('./records.csv', 'a') as f:
 		f.write(p + ',' + u + '\n')
 
+	mProject = Project(db, p, p)
+	mUser = User(db, u, u, p, 1)
+	mProject.setNewProject()
+	mUser.setNewUser()
+
 def connect ():
 	lock()
     # use project.get() and user.get() to get the project and user name
-    """
-    add code here
-    """
+
+
 
 root = tk.Tk()
 root.title(string = 'ICE')
