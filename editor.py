@@ -1,4 +1,7 @@
-import Tkinter as Tk
+try:
+    import Tkinter as Tk
+except ImportError:
+    import tkinter as Tk
 from random import random
 
 class tool (Tk.Button):
