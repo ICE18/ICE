@@ -9,10 +9,11 @@ var firebaseAdmin = admin.initializeApp({
 });
 
 var db = admin.firestore();
+const settings = {timestampsInSnapshots: true};
+db.settings(settings);
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-	console.log('Logging Kashish');
   res.render('index', { title: 'Express' });
 });
 
@@ -39,6 +40,7 @@ router.post('/createNewProject', function(req, res, next){
 				console.log('Added user with ID: ', userRef.id);
 				db.collection('projects').doc(projectId)
 					.collection('users').doc(userId).set({
+						name: pname[1],
 						id: userId,
 						timestamp: new Date().getTime()
 					})
@@ -46,6 +48,7 @@ router.post('/createNewProject', function(req, res, next){
 						console.log('Added user in project with ID: ', subProjectRef.id);
 						db.collection('users').doc(userId)
 							.collection('projects').doc(projectId).set({
+								name: pname[0],
 								id: projectId,
 								timestamp: new Date().getTime()
 							})
@@ -70,7 +73,7 @@ router.post('/createNewProject', function(req, res, next){
 	})
 
 });
-	
+
 
 router.get('/:projectId/editor', function(req, res, next){
 	var projectId = req.params.projectId;
