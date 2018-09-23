@@ -39,7 +39,19 @@ router.get('/editor/:id/:projectName', function(req, res, next){
     .get()
     .then(function(querySnapshot) {
 		if(querySnapshot.size != 0){
-			res.render('editor',{projectId: projectName});
+
+			db.collection("projects").where('name', "==", projectName)
+				.get()
+				.then(function(querySnapshot){
+					if(querySnapshot.size != 0){
+						 res.render('editor',{projectId: projectId, projectName: projectName});
+					} else{
+						res.send('Unauthorised access !!');
+					}
+				})
+				.catch(function(error) {
+					console.log("Error getting documents: ", error);
+				});
 		} else{
 			res.send('Unauthorised access !!');
 		}
