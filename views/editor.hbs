@@ -1,1 +1,94 @@
-<h1>{{ projectId }}</h1>
+<script src="/javascripts/fabric.min.js" type="text/javascript"></script>
+<script src="/jquery/jquery.js"></script>
+<link rel="stylesheet" href="/stylesheets/styleMainEditor.css" />	
+<link rel="stylesheet" href="/stylesheets/styleRangePicker.css" />	
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+
+<div class="col-md-12" id="mainScreen">
+    <br><br><br><br>
+    <div class="col-md-2" id="mToolbar">
+            <br><br>
+                <div class="col-md-12">
+                    <div class="col-md-4">
+                        <button id="bSquare"><i class="material-icons md-18">crop_square</i></button>
+                    </div>
+                    <div class="col-md-4">
+                        <button id="bCircle"><i class="material-icons md-18">add_circle_outline</i></button>
+                    </div>
+                    <div class="col-md-4">
+                        <button id="bPolygon"><i class="material-icons md-18">star_border</i></button>
+                    </div>
+                </div>
+                <br><br>
+                <div class="col-md-12">
+                    <div class="col-md-4">
+                        <button id="bLine"><i class="material-icons md-18">linear_scale</i></button>
+                    </div>
+                    <div class="col-md-4">
+                        <button><i class="material-icons md-18">add_circle_outline</i></button>
+                    </div>
+                    <div class="col-md-4">
+                        <button><i class="material-icons md-18">star_border</i></button>
+                    </div>
+                </div>
+                <br><br>
+                <div class="col-md-12">
+                    <div class="col-md-4">
+                        <button><i class="material-icons md-18">crop_square</i></button>
+                    </div>
+                    <div class="col-md-4">
+                        <button><i class="material-icons md-18">add_circle_outline</i></button>
+                    </div>
+                    <div class="col-md-4">
+                        <button><i class="material-icons md-18">star_border</i></button>
+                    </div>
+                </div>
+                <br><br>
+                <div class="col-md-12">
+                    <div class="col-md-4">
+                        <button><i class="material-icons md-18">crop_square</i></button>
+                    </div>
+                    <div class="col-md-4">
+                        <button><i class="material-icons md-18">add_circle_outline</i></button>
+                    </div>
+                    <div class="col-md-4">
+                        <button><i class="material-icons md-18">star_border</i></button>
+                    </div>
+                </div>
+                <br><br><br><br>
+        </div>
+    <div class="col-md-8">
+        <canvas id="mCanvas" height="400px" width="600px"></canvas>
+    </div>
+        <br><br><br><br>
+    <div class="col-md-2">
+            <br><br>
+                <div class="col-md-12">
+                    <div class="slidecontainer">
+                    <label for="rangeStroke">Set stroke</label>
+                    <input type="range" min="1" max="10" value="2" class="slider" id="rangeStroke">
+                    </div>
+                    <p>Value: <span id="strokeValue"></span></p>
+                </div>
+                <br><br>
+                <div class="col-md-12">
+                    <fieldset>
+                        <legend>Choose colors</legend>
+
+                        <div>
+                            <input type="color" id="strokeColor" name="color"
+                                value="#e66465" />
+                            <label for="strokeColor">Stroke color</label>
+                        </div>
+                        <div>
+                            <input type="color" id="fillColor" name="color"
+                                value="#f6b73c" />
+                            <label for="fillColor">Fill color</label>
+                        </div>                  
+                </fieldset>
+                </div>
+                <br><br>
+        </div>
+</div>
+<script src="/javascripts/canvas/canvasHelperMethods.js" type="text/javascript"></script>
+<script src="/javascripts/canvas/basicCanvas.js" type="text/javascript"></script>
