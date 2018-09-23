@@ -6,7 +6,7 @@
 		<form action="/submitHomeProjectName" method="POST">
 		<input type="text" name="pname" placeholder="Project Name" required="required" />
 		<button type="submit" class="btn btn-primary btn-block btn-large">Let me in.</button>
-		{{!-- <input type="text" name="userid" value={{  }} /> --}}
+		<input type="text" id="usernameHidded" name="username" value={{uname}} />
 		</form>
 		{{else}}
 		<form action="submitHomeUserName" method="POST">
