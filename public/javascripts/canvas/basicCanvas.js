@@ -5,6 +5,15 @@ fabric.Object.prototype.set({
 	padding: 5
 });
 
+document.addEventListener('DOMContentLoaded', function() {
+    var elems = document.querySelectorAll('.tooltipped');
+    var instances = M.Tooltip.init(elems);
+  });
+
+  $(document).ready(function(){
+    $('.tooltipped').tooltip();
+  });
+
 var canvas = new fabric.Canvas('mCanvas');
 
 var rect, circle, poly;
@@ -41,6 +50,37 @@ console.log(circle);
 canvas.add(circle);
 });
 
+$('#bTriangle').click(function(options) {
+	var points=regularPolygonPoints(3,30);
+	poly = makeid();
+	poly = new fabric.Polygon(points, {
+		id: poly,
+		stroke: 'black',
+		fill: 'white',
+		left: 50,
+		top: 50,
+		strokeWidth: 2,
+		strokeLineJoin: 'bevil'
+	},	false);
+	console.log(poly);
+	canvas.add(poly);
+	});
+
+	$('#bLine').click(function(options) {
+		var points=regularPolygonPoints(2,30);
+		poly = makeid();
+		poly = new fabric.Line([20, 50, 80, 50], {
+			id: poly,
+			stroke: 'black',
+			fill: 'white',
+			left: 50,
+			top: 50,
+			strokeWidth: 2,
+			strokeLineJoin: 'bevil'
+		},	false);
+		console.log(poly);
+		canvas.add(poly);
+		});
 
 $('#bPolygon').click(function(options) {
 var points=regularPolygonPoints(6,30);
@@ -57,6 +97,22 @@ poly = new fabric.Polygon(points, {
 console.log(poly);
 canvas.add(poly);
 });
+
+$('#bStar').click(function(options) {
+	var points=regularStarPoints(6,30);
+	poly = makeid();
+	poly = new fabric.Polygon(points, {
+		id: poly,
+		stroke: 'black',
+		fill: 'white',
+		left: 50,
+		top: 50,
+		strokeWidth: 2,
+		strokeLineJoin: 'bevil'
+	},	false);
+	console.log(poly);
+	canvas.add(poly);
+	});
 
 //Stroke range slider
 var strokeSlider = document.getElementById("rangeStroke");

@@ -1,11 +1,36 @@
-#mainScreen{
-	background: whitesmoke
+#editor{
+	padding: 10px;
+	background: darkslategray
 }
 
 #mToolbar{
+	padding: 10px 25px 0px 25px;
 	background: gray
 }
 
 #mCanvas{
 	background: white
+}
+
+.center {
+	margin: 0;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	-ms-transform: translate(-50%, -50%);
+	transform: translate(-50%, -50%);
+  }
+
+  label {
+
+    font-size: 1.2rem;
+    color: #b2d9e6;
+
+}
+
+legend {
+
+    font-size: 1.2rem;
+    color: #b2d9e6;
+
 }
