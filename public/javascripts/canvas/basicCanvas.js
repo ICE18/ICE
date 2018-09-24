@@ -14,14 +14,33 @@ document.addEventListener('DOMContentLoaded', function() {
     $('.tooltipped').tooltip();
   });
 
+const projectName = $('#hiddenProjectName').val()
 var canvas = new fabric.Canvas('mCanvas');
 
 var rect, circle, poly;
 
-$('#bSquare').click(function(options) {
+function hideProgressBar() {
+    var x = document.getElementById("progressBar");
+    x.style.display = "none";
+}
 
-  rect = makeid();
-  rect = new fabric.Rect({
+function showProgressBar() {
+    var x = document.getElementById("progressBar");
+    x.style.display = "block";
+}
+
+function showToastSynced(){
+	M.toast({html: 'Synced successfully !!'})
+}
+
+function showToastSyncError(){
+	M.toast({html: 'Error syncing, please try again.'})
+}
+
+//Create a rectangle
+$('#bSquare').click(function(options) {
+  	rect = makeid();
+  	rect = new fabric.Rect({
 		id: rect,
 		left: 50,
 		top: 50,
@@ -30,26 +49,30 @@ $('#bSquare').click(function(options) {
 		fill: 'rgba(255,255,255,1)',
 		stroke: 'rgba(0,0,0,1)',
 		strokeWidth: 2
- });
-console.log(rect);
-canvas.add(rect);
+	});
+	console.log(rect);
+	canvas.add(rect);
+	canvas.renderAll();
 });
 
+//Create a circle
 $('#bCircle').click(function(options) {
-circle = makeid();
-circle = new fabric.Circle({
-	id: circle,
-	left: 50,
-	top: 50,              
-	radius:25,
-	stroke:'black',
-	strokeWidth:2,
-	fill:'white'
-});
-console.log(circle);
-canvas.add(circle);
+	circle = makeid();
+	circle = new fabric.Circle({
+		id: circle,
+		left: 50,
+		top: 50,              
+		radius:25,
+		stroke:'black',
+		strokeWidth:2,
+		fill:'white'
+	});
+	console.log(circle);
+	canvas.add(circle);
+	canvas.renderAll();
 });
 
+//Create a triangle
 $('#bTriangle').click(function(options) {
 	var points=regularPolygonPoints(3,30);
 	poly = makeid();
@@ -64,40 +87,46 @@ $('#bTriangle').click(function(options) {
 	},	false);
 	console.log(poly);
 	canvas.add(poly);
-	});
-
-	$('#bLine').click(function(options) {
-		var points=regularPolygonPoints(2,30);
-		poly = makeid();
-		poly = new fabric.Line([20, 50, 80, 50], {
-			id: poly,
-			stroke: 'black',
-			fill: 'white',
-			left: 50,
-			top: 50,
-			strokeWidth: 2,
-			strokeLineJoin: 'bevil'
-		},	false);
-		console.log(poly);
-		canvas.add(poly);
-		});
-
-$('#bPolygon').click(function(options) {
-var points=regularPolygonPoints(6,30);
-poly = makeid();
-poly = new fabric.Polygon(points, {
-	id: poly,
-	stroke: 'black',
-	fill: 'white',
-	left: 50,
-	top: 50,
-	strokeWidth: 2,
-	strokeLineJoin: 'bevil'
-},	false);
-console.log(poly);
-canvas.add(poly);
+	canvas.renderAll();
 });
 
+//Create a line
+$('#bLine').click(function(options) {
+	var points=regularPolygonPoints(2,30);
+	poly = makeid();
+	poly = new fabric.Line([20, 50, 80, 50], {
+		id: poly,
+		stroke: 'black',
+		fill: 'white',
+		left: 50,
+		top: 50,
+		strokeWidth: 2,
+		strokeLineJoin: 'bevil'
+	},	false);
+	console.log(poly);
+	canvas.add(poly);
+	canvas.renderAll();
+});
+
+//Create a hexagon
+$('#bPolygon').click(function(options) {
+	var points=regularPolygonPoints(6,30);
+	poly = makeid();
+	poly = new fabric.Polygon(points, {
+		id: poly,
+		stroke: 'black',
+		fill: 'white',
+		left: 50,
+		top: 50,
+		strokeWidth: 2,
+		strokeLineJoin: 'bevil'
+	},	false);
+	console.log(poly);
+	canvas.add(poly);
+	canvas.renderAll();
+});
+
+//Create a star
 $('#bStar').click(function(options) {
 	var points=regularStarPoints(6,30);
 	poly = makeid();
@@ -112,7 +141,42 @@ $('#bStar').click(function(options) {
 	},	false);
 	console.log(poly);
 	canvas.add(poly);
+	canvas.renderAll();
 	});
+
+//Delete an object
+$('#bDelete').click(function(options) {
+	canvas.remove(canvas.getActiveObject());
+	canvas.renderAll();
+});
+
+//Sync you vector with cloud
+$('#bSync').click(function(options) {
+	showProgressBar();
+	db.collection('projects').doc(projectName)
+		.collection('svg').add({
+			xml: canvas.toSVG({suppressPreamble: true}),
+			timestamp: new Date().getTime()
+		})
+		.then(doc =>{
+			hideProgressBar();
+			showToastSynced();
+			console.log('Synced successfully')
+		})
+		.catch(error =>{
+			hideProgressBar();
+			showToastSyncError();
+			console.log('Error syncing: ',error)
+		})
+});
+
+//Save canvas as png
+$('#bSave').click(function(options) {
+	let time = new Date().getTime();
+	$('#mCanvas').get(0).toBlob(blob =>{
+		saveAs(blob,time+'.png');
+	});
+});
 
 //Stroke range slider
 var strokeSlider = document.getElementById("rangeStroke");
@@ -122,7 +186,7 @@ strokeSlider.oninput = function(){
 	var activeObject = canvas.getActiveObject();
 	strokeOutput.innerHTML = this.value;
 	activeObject.set('strokeWidth', parseInt(this.value));
-	canvas.add(activeObject);
+	canvas.renderAll();
 }
 
 //Stroke color picker
@@ -130,7 +194,7 @@ var strokeColorPicker = document.getElementById("strokeColor");
 strokeColorPicker.addEventListener("input", function() {
 	var activeObject = canvas.getActiveObject();
 	activeObject.set('stroke', strokeColorPicker.value);
-	canvas.add(activeObject);
+	canvas.renderAll();
 }, false); 
 
 //Fill color picker
@@ -138,11 +202,5 @@ var fillColorPicker = document.getElementById("fillColor");
 fillColorPicker.addEventListener("input", function() {
 	var activeObject = canvas.getActiveObject();
 	activeObject.set('fill', fillColorPicker.value);
-	canvas.add(activeObject);
+	canvas.renderAll();
 }, false); 
-
-
-
-//console.log('Required svg is : ', canvas.toSVG({
-//suppressPreamble: true
-//}));

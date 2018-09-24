@@ -1,11 +1,23 @@
 <script src="/javascripts/fabric.min.js" type="text/javascript"></script>
 <script src="/jquery/jquery.js"></script>
+<script src="/javascripts/FileSaver.js" type="text/javascript"></script>
+<script src="/javascripts/canvas-toBlob.js" type="text/javascript"></script>
+
 <link rel="stylesheet" href="/stylesheets/styleMainEditor.css" />	
 <link rel="stylesheet" href="/stylesheets/styleRangePicker.css" />	
 <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 
+
+<input type="text" id="hiddenProjectName" value={{ projectName }}>
+
+
 <div class="row" id="mainScreen">
     <div class="col" id="editor">
+
+        <div class="progress" id="progressBar">
+            <div class="indeterminate"></div>
+        </div>
+
         <div class="col" id="mToolbar">
             <div class="row">
                 <button id="bSquare" class="material-icons btn waves-effect waves-light tooltipped" data-position="right" data-tooltip="Rectangle">check_box_outline_blank</button>

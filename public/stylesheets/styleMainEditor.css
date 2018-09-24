@@ -21,7 +21,16 @@
 	transform: translate(-50%, -50%);
   }
 
-  label {
+
+#hiddenProjectName{
+	display: none;
+}
+
+#progressBar{
+	display: none;
+}
+
+label {
 
     font-size: 1.2rem;
     color: #b2d9e6;
