@@ -32,19 +32,21 @@ router.get('/:uname/:status', function(req, res, next) {
   res.render('index', { title: 'ICE-Home', isUser: status, uname: uname });
 });
 
-router.get('/editor/:id/:projectName', function(req, res, next){
+router.get('/editor/:id/:projectName/:username', function(req, res, next){
 	var projectName = req.params.projectName;
 	var projectId = req.params.id;
+	var username = req.params.username;
+
 	db.collection("projects").where('id', "==", projectId)
     .get()
     .then(function(querySnapshot) {
-		if(querySnapshot.size != 0){
+		if(querySnapshot.size > 0){
 
 			db.collection("projects").where('name', "==", projectName)
 				.get()
 				.then(function(querySnapshot){
-					if(querySnapshot.size != 0){
-						 res.render('editor',{projectId: projectId, projectName: projectName});
+					if(querySnapshot.size > 0){
+						 res.render('editor',{projectId: projectId, projectName: projectName, username: username});
 					} else{
 						res.send('Unauthorised access !!');
 					}
@@ -52,6 +54,7 @@ router.get('/editor/:id/:projectName', function(req, res, next){
 				.catch(function(error) {
 					console.log("Error getting documents: ", error);
 				});
+
 		} else{
 			res.send('Unauthorised access !!');
 		}
@@ -115,7 +118,7 @@ router.post('/submitHomeProjectName', function(req, res, next){
 			//Project exists, redirect to the editor
 			querySnapshot.forEach(function(doc) {
 				console.log(doc.id, " => ", doc.data());
-				res.redirect('/editor/'+doc.data().id+'/'+pname)
+				res.redirect('/editor/'+doc.data().id+'/'+pname+'/'+uname)
 			});
 		} else {
 			//Project does not exist, create one
@@ -149,7 +152,7 @@ router.post('/submitHomeProjectName', function(req, res, next){
 								})
 								.then(subUserRef =>{
 									//Everything complete, redirect to editor
-									res.redirect('/editor/'+pid+'/'+pname)
+									res.redirect('/editor/'+pid+'/'+pname+'/'+uname)
 								})
 							}
 						})

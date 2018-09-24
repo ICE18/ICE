@@ -15,6 +15,8 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
 const projectName = $('#hiddenProjectName').val()
+const userName = $('#hiddenUserName').val()
+
 var canvas = new fabric.Canvas('mCanvas');
 
 var rect, circle, poly;
@@ -36,6 +38,42 @@ function showToastSynced(){
 function showToastSyncError(){
 	M.toast({html: 'Error syncing, please try again.'})
 }
+
+function showToast(message){
+	M.toast({html: message})
+}
+
+function getExistingXml(){
+	showProgressBar();
+	var svgsRef = db.collection('projects')
+					.doc(projectName).collection('svg');
+	svgsRef.orderBy("timestamp", "desc").limit(1)
+	.get()
+	.then(results =>{
+		if(results.empty){
+			console.log('No data found');
+			hideProgressBar();
+		} else {
+			var strSvg = results.docs[0].data().xml
+			console.log('svgData: ',strSvg);
+			fabric.loadSVGFromString(strSvg, function(objects, options){
+				objects.forEach(svg =>{
+					canvas.add(svg).renderAll();
+				});
+				showToast('Latest commit fetched !!');
+				hideProgressBar();
+			});
+		}
+	})
+	.catch(error =>{
+		showToast('Error reaching servers !!');
+		hideProgressBar();
+		console.log('Error fetching existing xml', error);
+	})
+
+}
+
+getExistingXml();
 
 //Create a rectangle
 $('#bSquare').click(function(options) {
@@ -155,6 +193,7 @@ $('#bSync').click(function(options) {
 	showProgressBar();
 	db.collection('projects').doc(projectName)
 		.collection('svg').add({
+			username: userName,
 			xml: canvas.toSVG({suppressPreamble: true}),
 			timestamp: new Date().getTime()
 		})
