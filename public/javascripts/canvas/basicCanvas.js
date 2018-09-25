@@ -18,6 +18,10 @@ const projectName = $('#hiddenProjectName').val()
 const userName = $('#hiddenUserName').val()
 
 var canvas = new fabric.Canvas('mCanvas');
+var strokeSlider = document.getElementById("rangeStroke");
+var strokeOutput = document.getElementById("strokeValue");
+var strokeColorPicker = document.getElementById("strokeColor");
+var fillColorPicker = document.getElementById("fillColor");
 
 var rect, circle, poly;
 
@@ -73,7 +77,28 @@ function getExistingXml(){
 
 }
 
+function rgb2hex(rgb){
+	rgb = rgb.match(/^rgba?[\s+]?\([\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?/i);
+	return (rgb && rgb.length === 4) ? "#" +
+	 ("0" + parseInt(rgb[1],10).toString(16)).slice(-2) +
+	 ("0" + parseInt(rgb[2],10).toString(16)).slice(-2) +
+	 ("0" + parseInt(rgb[3],10).toString(16)).slice(-2) : '';
+}
+
+function onObjectSelected(e) {
+
+	strokeSlider.value  = parseInt(e.target.get('strokeWidth'))
+	strokeOutput.innerHTML  = e.target.get('strokeWidth')
+
+	strokeColorPicker.value  = rgb2hex(e.target.get('stroke'))
+	fillColorPicker.value  = rgb2hex(e.target.get('fill'))
+}
+
 getExistingXml();
+
+//Listen for object selected
+canvas.on('object:selected', onObjectSelected);
+canvas.on('selection:updated', onObjectSelected);
 
 //Create a rectangle
 $('#bSquare').click(function(options) {
@@ -218,8 +243,6 @@ $('#bSave').click(function(options) {
 });
 
 //Stroke range slider
-var strokeSlider = document.getElementById("rangeStroke");
-var strokeOutput = document.getElementById("strokeValue");
 strokeOutput.innerHTML = strokeSlider.value;
 strokeSlider.oninput = function(){
 	var activeObject = canvas.getActiveObject();
@@ -229,7 +252,6 @@ strokeSlider.oninput = function(){
 }
 
 //Stroke color picker
-var strokeColorPicker = document.getElementById("strokeColor");
 strokeColorPicker.addEventListener("input", function() {
 	var activeObject = canvas.getActiveObject();
 	activeObject.set('stroke', strokeColorPicker.value);
@@ -237,7 +259,6 @@ strokeColorPicker.addEventListener("input", function() {
 }, false); 
 
 //Fill color picker
-var fillColorPicker = document.getElementById("fillColor");
 fillColorPicker.addEventListener("input", function() {
 	var activeObject = canvas.getActiveObject();
 	activeObject.set('fill', fillColorPicker.value);
