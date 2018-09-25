@@ -35,6 +35,16 @@ function showProgressBar() {
     x.style.display = "block";
 }
 
+function showOptionsToolBar(){
+	var optionsToolbar = document.getElementById("mOptionsToolbar")
+	optionsToolbar.style.display = "block";
+}
+
+function hideOptionsToolBar(){
+	var optionsToolbar = document.getElementById("mOptionsToolbar")
+	optionsToolbar.style.display = "none";
+}
+
 function showToastSynced(){
 	M.toast({html: 'Synced successfully !!'})
 }
@@ -78,15 +88,19 @@ function getExistingXml(){
 }
 
 function rgb2hex(rgb){
+	if(rgb[0] == '#'){
+		return rgb;
+	} else{
 	rgb = rgb.match(/^rgba?[\s+]?\([\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?/i);
 	return (rgb && rgb.length === 4) ? "#" +
 	 ("0" + parseInt(rgb[1],10).toString(16)).slice(-2) +
 	 ("0" + parseInt(rgb[2],10).toString(16)).slice(-2) +
 	 ("0" + parseInt(rgb[3],10).toString(16)).slice(-2) : '';
+	}
 }
 
 function onObjectSelected(e) {
-
+	showOptionsToolBar();
 	strokeSlider.value  = parseInt(e.target.get('strokeWidth'))
 	strokeOutput.innerHTML  = e.target.get('strokeWidth')
 
@@ -94,17 +108,21 @@ function onObjectSelected(e) {
 	fillColorPicker.value  = rgb2hex(e.target.get('fill'))
 }
 
+function onObjectSelectionCleared(e){
+	hideOptionsToolBar();
+}
+
 getExistingXml();
 
 //Listen for object selected
 canvas.on('object:selected', onObjectSelected);
 canvas.on('selection:updated', onObjectSelected);
+canvas.on('selection:cleared', onObjectSelectionCleared);
 
 //Create a rectangle
 $('#bSquare').click(function(options) {
-  	rect = makeid();
   	rect = new fabric.Rect({
-		id: rect,
+		id: makeid(),
 		left: 50,
 		top: 50,
 		width: 50,
@@ -120,15 +138,14 @@ $('#bSquare').click(function(options) {
 
 //Create a circle
 $('#bCircle').click(function(options) {
-	circle = makeid();
 	circle = new fabric.Circle({
-		id: circle,
+		id: makeid(),
 		left: 50,
 		top: 50,              
 		radius:25,
-		stroke:'black',
-		strokeWidth:2,
-		fill:'white'
+		fill: 'rgba(255,255,255,1)',
+		stroke: 'rgba(0,0,0,1)',
+		strokeWidth:2
 	});
 	console.log(circle);
 	canvas.add(circle);
@@ -138,11 +155,10 @@ $('#bCircle').click(function(options) {
 //Create a triangle
 $('#bTriangle').click(function(options) {
 	var points=regularPolygonPoints(3,30);
-	poly = makeid();
 	poly = new fabric.Polygon(points, {
-		id: poly,
-		stroke: 'black',
-		fill: 'white',
+		id: makeid(),
+		fill: 'rgba(255,255,255,1)',
+		stroke: 'rgba(0,0,0,1)',
 		left: 50,
 		top: 50,
 		strokeWidth: 2,
@@ -156,11 +172,10 @@ $('#bTriangle').click(function(options) {
 //Create a line
 $('#bLine').click(function(options) {
 	var points=regularPolygonPoints(2,30);
-	poly = makeid();
 	poly = new fabric.Line([20, 50, 80, 50], {
-		id: poly,
-		stroke: 'black',
-		fill: 'white',
+		id: makeid(),
+		fill: 'rgba(255,255,255,1)',
+		stroke: 'rgba(0,0,0,1)',
 		left: 50,
 		top: 50,
 		strokeWidth: 2,
@@ -174,11 +189,10 @@ $('#bLine').click(function(options) {
 //Create a hexagon
 $('#bPolygon').click(function(options) {
 	var points=regularPolygonPoints(6,30);
-	poly = makeid();
 	poly = new fabric.Polygon(points, {
-		id: poly,
-		stroke: 'black',
-		fill: 'white',
+		id: makeid(),
+		fill: 'rgba(255,255,255,1)',
+		stroke: 'rgba(0,0,0,1)',
 		left: 50,
 		top: 50,
 		strokeWidth: 2,
@@ -192,11 +206,10 @@ $('#bPolygon').click(function(options) {
 //Create a star
 $('#bStar').click(function(options) {
 	var points=regularStarPoints(6,30);
-	poly = makeid();
 	poly = new fabric.Polygon(points, {
-		id: poly,
-		stroke: 'black',
-		fill: 'white',
+		id: makeid(),
+		fill: 'rgba(255,255,255,1)',
+		stroke: 'rgba(0,0,0,1)',
 		left: 50,
 		top: 50,
 		strokeWidth: 2,
@@ -205,7 +218,7 @@ $('#bStar').click(function(options) {
 	console.log(poly);
 	canvas.add(poly);
 	canvas.renderAll();
-	});
+});
 
 //Delete an object
 $('#bDelete').click(function(options) {
@@ -219,6 +232,7 @@ $('#bSync').click(function(options) {
 	db.collection('projects').doc(projectName)
 		.collection('svg').add({
 			username: userName,
+			json: canvas.toJSON({suppressPreamble: true}),
 			xml: canvas.toSVG({suppressPreamble: true}),
 			timestamp: new Date().getTime()
 		})

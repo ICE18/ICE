@@ -8,6 +8,10 @@
 	background: gray
 }
 
+#mOptionsToolbar{
+	display: none;
+}
+
 #mCanvas{
 	background: white
 }
