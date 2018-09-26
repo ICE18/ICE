@@ -18,6 +18,7 @@ const projectName = $('#hiddenProjectName').val()
 const userName = $('#hiddenUserName').val()
 
 var canvas = new fabric.Canvas('mCanvas');
+canvas. preserveObjectStacking = true;
 var strokeSlider = document.getElementById("rangeStroke");
 var strokeOutput = document.getElementById("strokeValue");
 var strokeColorPicker = document.getElementById("strokeColor");
