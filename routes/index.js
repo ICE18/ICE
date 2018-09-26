@@ -105,6 +105,113 @@ router.post('/submitHomeUserName', function(req, res, next){
 	
 });
 
+function projectExists(res,querySnapshot, pname, uname){
+			//Project exists, check if user exists in project
+			querySnapshot.forEach(function(projectDoc){
+				db.collection("projects").doc(pname)
+				.collection('users').where('name','==',uname)
+				.get()
+				.then(function(querySnapshotUser){
+					if(querySnapshotUser.size!=0){
+						//User exists in project, redirect to editor
+						querySnapshotUser.forEach(function(doc) {
+							console.log(doc.id, " => ", doc.data());
+							res.redirect('/editor/'+projectDoc.data().id+'/'+pname+'/'+uname)
+							});
+					} else{
+						//User doesn't exists in project, get user details
+						db.collection('users').doc(uname)
+						.get()
+						.then(userDoc => {
+							if (!userDoc.exists) {
+								console.log('No such document!');
+							} else {
+								//Got userid, now add this user in projects->users
+								db.collection('projects').doc(pname)
+								.collection('users').doc(uname).set({
+									id: userDoc.data().id,
+									name: uname,
+									timestamp: new Date().getTime()
+								})
+								.then(subProjectRef =>{
+									db.collection('users').doc(uname)
+									.collection('projects').doc(pname).set({
+										id: projectDoc.data().id,
+										name: pname,
+										timestamp: new Date().getTime()
+									})
+									.then(subUserRef =>{
+										res.redirect('/editor/'+projectDoc.data().id+'/'+pname+'/'+uname)
+									})
+									.catch(error =>{
+										console.log('Error creating users->projects')
+									})
+								})
+								.catch(error =>{
+									console.log('Error creating projects->users')
+								})
+							}
+						})
+						.catch(error =>{
+							console.log('Errors', error)
+						})	
+					}
+				})
+				.catch(error =>{
+					console.log('Errors', error)
+				})	
+		})
+}
+
+function projectDoesNotExist(res,pname, uname, pid){
+
+	db.collection("projects").doc(pname).set({
+		id: pid,
+		name: pname,
+		timestamp: new Date().getTime()
+	})
+	.then(projectRef =>{
+		//Project created, now add this project in users->projects
+		db.collection('users').doc(uname).collection('projects')
+		.doc(pname).set({
+			id: pid,
+			name: pname,
+			timestamp: new Date().getTime()
+		})
+		.then(subProjectRef =>{
+			//Project added, now fetch user details from username to get userid
+			db.collection('users').doc(uname)
+				.get()
+				.then(doc => {
+					if (!doc.exists) {
+					console.log('No such document!');
+					} else {
+						//Got userid, now add this user in projects->users
+						db.collection('projects').doc(pname)
+						.collection('users').doc(uname).set({
+							id: doc.data().id,
+							name: uname,
+							timestamp: new Date().getTime()
+						})
+						.then(subUserRef =>{
+							//Everything complete, redirect to editor
+							res.redirect('/editor/'+pid+'/'+pname+'/'+uname)
+						})
+						.catch(error =>{
+							console.log('Error creating projects->users')
+						})
+					}
+				})
+				.catch(err => {
+					console.log('Error getting user details ', err);
+				});
+		})
+	})
+	.catch(function(error) {
+		console.log('Error creating users->project')
+	});
+}
+
 router.post('/submitHomeProjectName', function(req, res, next){
 	var pname = req.body.pname;
 	var uname = req.body.username;
@@ -115,59 +222,14 @@ router.post('/submitHomeProjectName', function(req, res, next){
     .get()
     .then(function(querySnapshot) {
         if(querySnapshot.size != 0){
-			//Project exists, redirect to the editor
-			querySnapshot.forEach(function(doc) {
-				console.log(doc.id, " => ", doc.data());
-				res.redirect('/editor/'+doc.data().id+'/'+pname+'/'+uname)
-			});
+			projectExists(res,querySnapshot, pname, uname);
 		} else {
 			//Project does not exist, create one
-			db.collection("projects").doc(pname).set({
-				id: pid,
-				name: pname,
-				timestamp: new Date().getTime()
-			})
-			.then(projectRef =>{
-				//Project created, now add this project in users->projects
-				db.collection('users').doc(uname).collection('projects')
-				.doc(pname).set({
-					id: pid,
-					name: pname,
-					timestamp: new Date().getTime()
-				})
-				.then(subProjectRef =>{
-					//Project added, now fetch user details from username to get userid
-					db.collection('users').doc(uname)
-						.get()
-						.then(doc => {
-							if (!doc.exists) {
-							console.log('No such document!');
-							} else {
-								//Got userid, now add this user in projects->users
-								db.collection('projects').doc(pname)
-								.collection('users').doc(uname).set({
-									id: doc.data().id,
-									name: uname,
-									timestamp: new Date().getTime()
-								})
-								.then(subUserRef =>{
-									//Everything complete, redirect to editor
-									res.redirect('/editor/'+pid+'/'+pname+'/'+uname)
-								})
-							}
-						})
-						.catch(err => {
-							console.log('Error getting document', err);
-						});
-				})
-			})
-			.catch(function(error) {
-				console.log("Error creating project: ", error);
-			});
+			projectDoesNotExist(res,pname, uname, pid);
 		}
     })
     .catch(function(error) {
-        console.log("Error getting documents: ", error);
+        console.log("Error creating project: ", error);
     });
 });
 
