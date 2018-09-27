@@ -1,5 +1,6 @@
 <script src="/javascripts/fabric.min.js" type="text/javascript"></script>
 <script src="/jquery/jquery.js"></script>
+
 <script src="/javascripts/FileSaver.js" type="text/javascript"></script>
 <script src="/javascripts/canvas-toBlob.js" type="text/javascript"></script>
 
@@ -13,8 +14,8 @@
 
 
 <div class="row" id="mainScreen">
+    <button id="bPreview" onclick="openPrev()" class="material-icons btn waves-effect waves-light tooltipped" data-position="top" data-tooltip="Preview latest commit">slideshow</button>
     <div class="col" id="editor">
-
         <div class="progress" id="progressBar">
             <div class="indeterminate"></div>
         </div>
@@ -78,5 +79,21 @@
 
     </div>
 </div>
+
+ <div id="myNav" class="overlay">
+  <!-- Button to close the overlay navigation -->
+<a href="javascript:void(0)" class="closebtn" onclick="closePrev()">&times;</a>
+  <!-- Overlay content -->
+    <div class="overlay-content">
+        <div class="centered" style="width:800px">
+            <div class="progress" id="prevProgressBar">
+                <div class="indeterminate"></div>
+            </div>
+            <canvas class="valign-wrapper" id="mPreviewCanvas" height="514px" width="800px"></canvas>
+        </div>
+    </div>
+</div>
+
+
 <script src="/javascripts/canvas/canvasHelperMethods.js" type="text/javascript"></script>
 <script src="/javascripts/canvas/basicCanvas.js" type="text/javascript"></script>

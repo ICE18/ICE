@@ -17,6 +17,10 @@ document.addEventListener('DOMContentLoaded', function() {
 const projectName = $('#hiddenProjectName').val()
 const userName = $('#hiddenUserName').val()
 
+var mTimestamp;
+
+var prevCanvas = new fabric.Canvas('mPreviewCanvas');
+prevCanvas. preserveObjectStacking = true;
 var canvas = new fabric.Canvas('mCanvas');
 canvas. preserveObjectStacking = true;
 var strokeSlider = document.getElementById("rangeStroke");
@@ -26,6 +30,25 @@ var fillColorPicker = document.getElementById("fillColor");
 
 var rect, circle, poly;
 
+function listenToLatestChanges(){
+	console.log('Listening...')
+	db.collection('projects')
+		.doc(projectName).collection('svg').where('timestamp','>',mTimestamp)
+			.onSnapshot(snapshot =>{
+				snapshot.docChanges().forEach(function(change) {
+					console.log('Some stuff changed!!')
+					if (change.type === "added") {
+						console.log("New city: ", change.doc.data());
+						if(change.doc.data().username == userName){
+							//Do nothing
+						} else{
+							showToast(change.doc.data().username+' made some changes !!')
+						}
+					}
+				});
+			})
+}
+
 function hideProgressBar() {
     var x = document.getElementById("progressBar");
     x.style.display = "none";
@@ -33,6 +56,16 @@ function hideProgressBar() {
 
 function showProgressBar() {
     var x = document.getElementById("progressBar");
+    x.style.display = "block";
+}
+
+function hidePrevProgressBar() {
+    var x = document.getElementById("prevProgressBar");
+    x.style.display = "none";
+}
+
+function showPrevProgressBar() {
+    var x = document.getElementById("prevProgressBar");
     x.style.display = "block";
 }
 
@@ -70,12 +103,14 @@ function getExistingXml(){
 			hideProgressBar();
 		} else {
 			var strSvg = results.docs[0].data().xml
+			mTimestamp = results.docs[0].data().timestamp
 			console.log('svgData: ',strSvg);
 			fabric.loadSVGFromString(strSvg, function(objects, options){
 				objects.forEach(svg =>{
 					canvas.add(svg).renderAll();
 				});
-				showToast('Latest commit fetched !!');
+				//showToast('Latest commit fetched !!');
+				listenToLatestChanges();
 				hideProgressBar();
 			});
 		}
@@ -83,6 +118,35 @@ function getExistingXml(){
 	.catch(error =>{
 		showToast('Error reaching servers !!');
 		hideProgressBar();
+		console.log('Error fetching existing xml', error);
+	})
+
+}
+
+function getExistingXmlPreview(){
+	showPrevProgressBar();
+	var svgsRef = db.collection('projects')
+					.doc(projectName).collection('svg');
+	svgsRef.orderBy("timestamp", "desc").limit(1)
+	.get()
+	.then(results =>{
+		if(results.empty){
+			console.log('No data found');
+			hideProgressBar();
+		} else {
+			var strSvg = results.docs[0].data().xml
+			console.log('svgData: ',strSvg);
+			fabric.loadSVGFromString(strSvg, function(objects, options){
+				objects.forEach(svg =>{
+					prevCanvas.add(svg).renderAll();
+				});
+				hidePrevProgressBar();
+			});
+		}
+	})
+	.catch(error =>{
+		showToast('Error reaching servers !!');
+		hidePrevProgressBar();
 		console.log('Error fetching existing xml', error);
 	})
 
@@ -113,7 +177,18 @@ function onObjectSelectionCleared(e){
 	hideOptionsToolBar();
 }
 
+function openPrev() {
+	document.getElementById("myNav").style.width = "100%";
+	prevCanvas.clear();
+	getExistingXmlPreview();
+}
+
+function closePrev() {
+    document.getElementById("myNav").style.width = "0%";
+}
+
 getExistingXml();
+
 
 //Listen for object selected
 canvas.on('object:selected', onObjectSelected);
@@ -230,6 +305,66 @@ $('#bDelete').click(function(options) {
 //Sync you vector with cloud
 $('#bSync').click(function(options) {
 	showProgressBar();
+	// var svgsRef = db.collection('projects')
+	// .doc(projectName).collection('svg');
+	// svgsRef.orderBy("timestamp", "desc").limit(1)
+	// .get()
+	// .then(results =>{
+	// 	if(results.empty){
+	// 		hideProgressBar();
+	// 		console.log('No data found');
+	// 	} else {
+	// 		var fetchedJson = results.docs[0].data().json;
+	// 		if(results.docs[0].data().timestamp == mTimestamp){
+	// 			//We are working on latest commit
+	// 				db.collection('projects').doc(projectName)
+	// 					.collection('svg').add({
+	// 						username: userName,
+	// 						json: canvas.toJSON({suppressPreamble: true}),
+	// 						xml: canvas.toSVG({suppressPreamble: true}),
+	// 						timestamp: new Date().getTime()
+	// 					})
+	// 					.then(doc =>{
+	// 						hideProgressBar();
+	// 						showToastSynced();
+	// 						console.log('Synced successfully')
+	// 					})
+	// 					.catch(error =>{
+	// 						hideProgressBar();
+	// 						showToastSyncError();
+	// 						console.log('Error syncing: ',error)
+	// 					})
+	// 		} else{
+	// 			//We are working on outdated commit
+	// 			var resJson = mergeAdvanced(fetchedJson, canvas.toJSON({suppressPreamble: true})
+	// 				,{
+	// 					cb: (inputArg1, inputArg2, resultAboutToBeReturned, infoObj) => {
+	// 					  if (typeof inputArg1 === "boolean" && typeof inputArg2 === "boolean") {
+	// 						return inputArg2;
+	// 					  	}
+	// 					  return resultAboutToBeReturned;
+	// 					}
+	// 				})
+	// 			console.log(resJson)
+	// 			canvas.loadFromJson(resJson)
+	// 					showToast('Latest commit fetched !!');
+	// 					hideProgressBar();
+	// 				// fabric.loadSVGFromString(strSvg, function(objects, options){
+	// 				// 	objects.forEach(svg =>{
+	// 				// 		canvas.add(svg).renderAll();
+	// 				// 	});
+	// 				// 	showToast('Latest commit fetched !!');
+	// 				// 	hideProgressBar();
+	// 				// });
+	// 		}			
+	// 	}
+	// })
+	// .catch(error =>{
+	// 	showToast('Error reaching servers !!');
+	// 	hideProgressBar();
+	// 	console.log('Error fetching existing xml', error);
+	// })
+
 	db.collection('projects').doc(projectName)
 		.collection('svg').add({
 			username: userName,
