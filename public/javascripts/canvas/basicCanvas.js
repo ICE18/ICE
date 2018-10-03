@@ -296,10 +296,17 @@ $('#bStar').click(function(options) {
 	canvas.renderAll();
 });
 
-//Delete an object
+//Delete selected objects
 $('#bDelete').click(function(options) {
-	canvas.remove(canvas.getActiveObject());
-	canvas.renderAll();
+	var selected = canvas.getActiveObjects(),
+	selGroup = new fabric.ActiveSelection(selected, {canvas: canvas});
+	if (selGroup) {
+		selGroup.forEachObject(function (obj) {
+		canvas.remove(obj);
+		});
+		// Use discardActiveObject to remove the selection border
+		canvas.discardActiveObject().renderAll();
+	} else	return false;
 });
 
 //Sync you vector with cloud
@@ -414,3 +421,48 @@ fillColorPicker.addEventListener("input", function() {
 	activeObject.set('fill', fillColorPicker.value);
 	canvas.renderAll();
 }, false); 
+
+// Custom right click menu
+$(document).bind("contextmenu",function(e){
+	e.preventDefault();
+	console.log(e.pageX + "," + e.pageY);
+	$("#cntnr").css("left",e.pageX);
+	$("#cntnr").css("top",e.pageY);
+   // $("#cntnr").hide(100);        
+	$("#cntnr").fadeIn(200,startFocusOut());      
+});
+
+// Focus out div on click anywhere else
+function startFocusOut(){
+	$(document).on("click",function(){
+	$("#cntnr").hide();        
+	$(document).off("click");
+	});
+}
+
+// Set item onClickListener on custom right click menu
+$("#items > li").click(function(){
+
+	switch ($(this).text()) { 
+		case 'Group Items': 
+			alert('Group Wins!');
+			break;
+		case 'Ungroup Items': 
+			alert('Ungroup Wins!');
+			break;
+		case 'Send Backwards': 
+			canvas.sendBackwards( canvas.getActiveObject())
+			break;		
+		case 'Send to Back': 
+			canvas.sendToBack(canvas.getActiveObject())
+			break;
+		case 'Bring to Forward':
+			canvas.bringForward(canvas.getActiveObject())
+			break;
+		case 'Bring to Front':
+			canvas.bringToFront(canvas.getActiveObject())
+			break;
+		default:
+			break;
+	}
+});
