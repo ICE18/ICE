@@ -25,6 +25,8 @@ var canvas = new fabric.Canvas('mCanvas');
 canvas. preserveObjectStacking = true;
 var strokeSlider = document.getElementById("rangeStroke");
 var strokeOutput = document.getElementById("strokeValue");
+var alphaSlider = document.getElementById("rangeAlpha");
+var alphaOutput = document.getElementById("alphaValue");
 var strokeColorPicker = document.getElementById("strokeColor");
 var fillColorPicker = document.getElementById("fillColor");
 
@@ -166,11 +168,18 @@ function rgb2hex(rgb){
 
 function onObjectSelected(e) {
 	showOptionsToolBar();
-	strokeSlider.value  = parseInt(e.target.get('strokeWidth'))
-	strokeOutput.innerHTML  = e.target.get('strokeWidth')
-
-	strokeColorPicker.value  = rgb2hex(e.target.get('stroke'))
-	fillColorPicker.value  = rgb2hex(e.target.get('fill'))
+	try{
+		strokeSlider.value  = parseInt(e.target.get('strokeWidth'))
+		strokeOutput.innerHTML  = e.target.get('strokeWidth')
+	
+		alphaSlider.value  = parseFloat((e.target.get('opacity'))*10).toString()
+		alphaOutput.innerHTML  = parseFloat((e.target.get('opacity'))*10).toString()
+	
+		strokeColorPicker.value  = rgb2hex(e.target.get('stroke'))
+		fillColorPicker.value  = rgb2hex(e.target.get('fill'))
+	} catch(error){
+		console.log(error)
+	}
 }
 
 function onObjectSelectionCleared(e){
@@ -203,8 +212,8 @@ $('#bSquare').click(function(options) {
 		top: 50,
 		width: 50,
 		height: 50,
-		fill: 'rgba(255,255,255,1)',
-		stroke: 'rgba(0,0,0,1)',
+		fill: '#FFFFFF',
+		stroke: '#000000',
 		strokeWidth: 2
 	});
 	console.log(rect);
@@ -219,8 +228,8 @@ $('#bCircle').click(function(options) {
 		left: 50,
 		top: 50,              
 		radius:25,
-		fill: 'rgba(255,255,255,1)',
-		stroke: 'rgba(0,0,0,1)',
+		fill: '#FFFFFF',
+		stroke: '#000000',
 		strokeWidth:2
 	});
 	console.log(circle);
@@ -233,8 +242,8 @@ $('#bTriangle').click(function(options) {
 	var points=regularPolygonPoints(3,30);
 	poly = new fabric.Polygon(points, {
 		id: makeid(),
-		fill: 'rgba(255,255,255,1)',
-		stroke: 'rgba(0,0,0,1)',
+		fill: '#FFFFFF',
+		stroke: '#000000',
 		left: 50,
 		top: 50,
 		strokeWidth: 2,
@@ -250,8 +259,8 @@ $('#bLine').click(function(options) {
 	var points=regularPolygonPoints(2,30);
 	poly = new fabric.Line([20, 50, 80, 50], {
 		id: makeid(),
-		fill: 'rgba(255,255,255,1)',
-		stroke: 'rgba(0,0,0,1)',
+		fill: '#FFFFFF',
+		stroke: '#000000',
 		left: 50,
 		top: 50,
 		strokeWidth: 2,
@@ -267,8 +276,8 @@ $('#bPolygon').click(function(options) {
 	var points=regularPolygonPoints(6,30);
 	poly = new fabric.Polygon(points, {
 		id: makeid(),
-		fill: 'rgba(255,255,255,1)',
-		stroke: 'rgba(0,0,0,1)',
+		fill: '#FFFFFF',
+		stroke: '#000000',
 		left: 50,
 		top: 50,
 		strokeWidth: 2,
@@ -284,8 +293,8 @@ $('#bStar').click(function(options) {
 	var points=regularStarPoints(6,30);
 	poly = new fabric.Polygon(points, {
 		id: makeid(),
-		fill: 'rgba(255,255,255,1)',
-		stroke: 'rgba(0,0,0,1)',
+		fill: '#FFFFFF',
+		stroke: '#000000',
 		left: 50,
 		top: 50,
 		strokeWidth: 2,
@@ -408,6 +417,15 @@ strokeSlider.oninput = function(){
 	canvas.renderAll();
 }
 
+//Alpha range slider
+alphaOutput.innerHTML = alphaSlider.value;
+alphaSlider.oninput = function(){
+	var activeObject = canvas.getActiveObject();
+	alphaOutput.innerHTML = this.value;
+	activeObject.set('opacity', parseFloat((this.value)/10));
+	canvas.renderAll();
+}
+
 //Stroke color picker
 strokeColorPicker.addEventListener("input", function() {
 	var activeObject = canvas.getActiveObject();
@@ -442,13 +460,26 @@ function startFocusOut(){
 
 // Set item onClickListener on custom right click menu
 $("#items > li").click(function(){
-
 	switch ($(this).text()) { 
 		case 'Group Items': 
-			alert('Group Wins!');
+			if (!canvas.getActiveObject()) {
+				return;
+			}
+			if (canvas.getActiveObject().type !== 'activeSelection') {
+				return;
+			}
+			canvas.getActiveObject().toGroup();
+			canvas.requestRenderAll();
 			break;
 		case 'Ungroup Items': 
-			alert('Ungroup Wins!');
+			if (!canvas.getActiveObject()) {
+				return;
+			}
+			if (canvas.getActiveObject().type !== 'group') {
+				return;
+			}
+			canvas.getActiveObject().toActiveSelection();
+			canvas.requestRenderAll();
 			break;
 		case 'Send Backwards': 
 			canvas.sendBackwards( canvas.getActiveObject())
