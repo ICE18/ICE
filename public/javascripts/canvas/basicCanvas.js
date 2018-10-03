@@ -263,6 +263,7 @@ $('#bLine').click(function(options) {
 		stroke: '#000000',
 		left: 50,
 		top: 50,
+		lockScalingY: true,
 		strokeWidth: 2,
 		strokeLineJoin: 'bevil'
 	},	false);
@@ -461,6 +462,40 @@ function startFocusOut(){
 // Set item onClickListener on custom right click menu
 $("#items > li").click(function(){
 	switch ($(this).text()) { 
+		case 'Copy':
+			canvas.getActiveObject().clone(function(cloned) {
+				_clipboard = cloned;
+			});
+			break;
+		case 'Paste':
+			_clipboard.clone(function(clonedObj) {
+				canvas.discardActiveObject();
+				clonedObj.set({
+					left: clonedObj.left + 10,
+					top: clonedObj.top + 10,
+					evented: true,
+				});
+				if (clonedObj.type === 'activeSelection') {
+					// active selection needs a reference to the canvas.
+					clonedObj.canvas = canvas;
+					clonedObj.forEachObject(function(obj) {
+						canvas.add(obj);
+					});
+					// this should solve the unselectability
+					clonedObj.setCoords();
+				} else {
+					canvas.add(clonedObj);
+				}
+				_clipboard.top += 10;
+				_clipboard.left += 10;
+				canvas.setActiveObject(clonedObj);
+				canvas.requestRenderAll();
+			});
+			break;
+		case 'Deselect':
+			canvas.discardActiveObject();
+			canvas.requestRenderAll();
+			break;
 		case 'Group Items': 
 			if (!canvas.getActiveObject()) {
 				return;

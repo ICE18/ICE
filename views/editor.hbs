@@ -53,6 +53,12 @@
             <canvas class="valign-wrapper" id="mCanvas" height="514px" width="800px"></canvas>
             <div id='cntnr'>
                     <ul id='items'>
+                    <li id="copy_items">Copy</li>
+                    <li id="paste_items">Paste</li>
+                    </ul>
+                    <hr />
+                    <ul id='items'>
+                    <li id="deselect_items">Deselect</li>
                     <li id="group_items">Group Items</li>
                     <li id="ungroup_items">Ungroup Items</li>
                     </ul>
@@ -69,7 +75,7 @@
             <div class="row">
                 <div class="slidecontainer">
                     <label for="rangeStroke">Set stroke</label>
-                    <input type="range" min="1" max="10" value="2" class="slider" id="rangeStroke">
+                    <input type="range" min="0" max="10" value="2" class="slider" id="rangeStroke">
                 </div>
                 <label>Value: <span id="strokeValue"></span></label>
             </div>
