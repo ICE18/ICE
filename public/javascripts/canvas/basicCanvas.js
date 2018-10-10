@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
 const projectName = $('#hiddenProjectName').val()
 const userName = $('#hiddenUserName').val()
 
-var mTimestamp;
+var mTimestamp = new Date().getTime();;
 
 var prevCanvas = new fabric.Canvas('mPreviewCanvas');
 prevCanvas. preserveObjectStacking = true;
@@ -32,15 +32,64 @@ var fillColorPicker = document.getElementById("fillColor");
 
 var rect, circle, poly;
 
-function listenToLatestChanges(){
-	console.log('Listening...')
+var mCommitHtml;
+
+function displayCommit(commit){
+	if(commit.exists){
+
+		let mXml = commit.data().xml
+
+		mXml = mXml.replace('width=','width="250"');
+		mXml = mXml.replace('height=','height="220"');
+		mXml = mXml.replace('viewBox=',' preserveAspectRatio="xMidYMid meet" viewBox="0 0 900 900"')
+
+		mCommitHtml+= '<div class="card">'+
+		 '<svg>'+mXml+'</svg>'+
+		 '<div class="container">'+
+		 '<p>'+commit.data().username+'</p>'+
+		 '<p>'+commit.data().timestamp+'</p>'+
+		 '</div>'+
+		 '</div>'
+	}
+}
+
+
+function getAllCommits(){
 	db.collection('projects')
-		.doc(projectName).collection('svg').where('timestamp','>',mTimestamp)
+	.doc(projectName).collection('svg')
+	.orderBy("timestamp", "desc").get()
+	.then(querySnapshot => {
+			querySnapshot.forEach(displayCommit)
+			document.getElementById("commits").innerHTML = mCommitHtml; 
+	})
+}
+
+function listenToLatestChanges(){
+	db.collection('projects')
+		.doc(projectName).collection('svg').where("timestamp",">",mTimestamp)
 			.onSnapshot(snapshot =>{
 				snapshot.docChanges().forEach(function(change) {
-					console.log('Some stuff changed!!')
 					if (change.type === "added") {
-						console.log("New city: ", change.doc.data());
+						
+						let mXml = change.doc.data().xml
+
+						mXml = mXml.replace('width=','width="250"');
+						mXml = mXml.replace('height=','height="220"');
+						mXml = mXml.replace('viewBox=',' preserveAspectRatio="xMidYMid meet" viewBox="0 0 1000 1000"')
+						
+						//Adding Commits to list
+						var mCommit = '<div class="card">'+
+										'<svg>'+mXml+'</svg>'+
+										'<div class="container">'+
+										'<p>'+change.doc.data().username+'</p>'+
+										'<p>'+change.doc.data().timestamp+'</p>'+
+										'</div>'+
+										'</div>';
+
+						document.getElementById("commits").innerHTML = mCommit + mCommitHtml;
+						mCommitHtml = mCommit + mCommitHtml; 
+
+						//Displaying toast on new commit
 						if(change.doc.data().username == userName){
 							//Do nothing
 						} else{
@@ -112,7 +161,6 @@ function getExistingXml(){
 					canvas.add(svg).renderAll();
 				});
 				//showToast('Latest commit fetched !!');
-				listenToLatestChanges();
 				hideProgressBar();
 			});
 		}
@@ -197,6 +245,8 @@ function closePrev() {
 }
 
 getExistingXml();
+listenToLatestChanges();
+getAllCommits();
 
 
 //Listen for object selected
@@ -385,16 +435,18 @@ $('#bSync').click(function(options) {
 	db.collection('projects').doc(projectName)
 		.collection('svg').add({
 			username: userName,
-			json: canvas.toJSON({suppressPreamble: true}),
+			json: canvas.toJSON({suppressPreamble: true}).toString(),
 			xml: canvas.toSVG({suppressPreamble: true}),
 			timestamp: new Date().getTime()
 		})
 		.then(doc =>{
+			mTimestamp = new Date().getTime();
 			hideProgressBar();
 			showToastSynced();
 			console.log('Synced successfully')
 		})
 		.catch(error =>{
+			mTimestamp = new Date().getTime();
 			hideProgressBar();
 			showToastSyncError();
 			console.log('Error syncing: ',error)
