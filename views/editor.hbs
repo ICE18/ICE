@@ -14,7 +14,6 @@
 
 
 <div class="row" id="mainScreen">
-    <button id="bPreview" onclick="openPrev()" class="material-icons btn waves-effect waves-light tooltipped" data-position="top" data-tooltip="Preview latest commit">slideshow</button>
     <div class="col" id="editor">
         <div class="progress" id="progressBar">
             <div class="indeterminate"></div>
@@ -49,7 +48,7 @@
                 <button id="bSync" class="material-icons btn waves-effect waves-light tooltipped" data-position="right" data-tooltip="Sync With Cloud">autorenew</button>
             </div>
         </div>
-        <div class="col">
+        <div class="col" onclick="">
             <canvas class="valign-wrapper" id="mCanvas" height="514px" width="800px"></canvas>
             <div id='cntnr'>
                     <ul id='items'>
@@ -102,11 +101,11 @@
             </div>
         </div>
     </div>
-    <div class="col" id="chat">
+    <button id="bPreview" onclick="openPrev()" class="col material-icons btn waves-effect waves-light tooltipped" data-position="top" data-tooltip="Preview latest commit">slideshow</button>
+    <div class="col" id="commits">
 
     </div>
 </div>
-
  <div id="myNav" class="overlay">
   <!-- Button to close the overlay navigation -->
 <a href="javascript:void(0)" class="closebtn" onclick="closePrev()">&times;</a>
