@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
 const projectName = $('#hiddenProjectName').val()
 const userName = $('#hiddenUserName').val()
 
-var mTimestamp = new Date().getTime();;
+var mTimestamp = new Date().getTime();
 
 var prevCanvas = new fabric.Canvas('mPreviewCanvas');
 prevCanvas. preserveObjectStacking = true;
@@ -31,7 +31,7 @@ var strokeColorPicker = document.getElementById("strokeColor");
 var fillColorPicker = document.getElementById("fillColor");
 
 var rect, circle, poly;
-var isDown, continueSelection;
+var isDown = false, continueSelection = false;
 var mCommitHtml;
 
 function displayCommit(commit){
@@ -244,6 +244,20 @@ function closePrev() {
     document.getElementById("myNav").style.width = "0%";
 }
 
+function turnOffLine(){
+	if(isDown){
+		canvas.selection = true; isDown = false; 
+		canvas.forEachObject(object => object.set({selectable:true}))
+	}
+}
+
+function turnOnLine(){
+	if(!isDown){
+		canvas.selection = false; isDown = true;
+		canvas.forEachObject(object => object.set({selectable:false}))
+	}
+}
+
 getExistingXml();
 listenToLatestChanges();
 getAllCommits();
@@ -269,7 +283,7 @@ canvas.on('mouse:down', function(o){
 				strokeLineJoin: 'bevil'
 			},	false);
 		canvas.add(line);
-	}
+	} 
   });
   
 canvas.on('mouse:move', function(o){
@@ -277,17 +291,21 @@ canvas.on('mouse:move', function(o){
 			var pointer = canvas.getPointer(o.e);
 			line.set({ x2: pointer.x, y2: pointer.y });
 			canvas.renderAll();
-		}
+		} 
   });
 
-canvas.on('mouse:up', function(o){
-	continueSelection = false;
-	line.setCoords();
+	canvas.on('mouse:up', function(o){
+	
+		if(continueSelection && isDown){
+			continueSelection = false;
+			line.setCoords();
+		}
   });
 
 
 //Create a rectangle
 $('#bSquare').click(function(options) {
+	turnOffLine();
   	rect = new fabric.Rect({
 		id: makeid(),
 		left: 50,
@@ -305,6 +323,7 @@ $('#bSquare').click(function(options) {
 
 //Create a circle
 $('#bCircle').click(function(options) {
+	turnOffLine();
 	circle = new fabric.Circle({
 		id: makeid(),
 		left: 50,
@@ -321,6 +340,7 @@ $('#bCircle').click(function(options) {
 
 //Create a triangle
 $('#bTriangle').click(function(options) {
+	turnOffLine();
 	var points=regularPolygonPoints(3,30);
 	poly = new fabric.Polygon(points, {
 		id: makeid(),
@@ -338,18 +358,13 @@ $('#bTriangle').click(function(options) {
 
 //Create a line
 $('#bLine').click(function(options) {
-	if(isDown) {
-		canvas.selection = true; isDown = false; 
-		canvas.forEachObject(object => object.set({selectable:true}))
-	}
-	else {
-		canvas.selection = false; isDown = true;
-		canvas.forEachObject(object => object.set({selectable:false}))
-	}
+	turnOffLine();
+	turnOnLine();
 });
 
 //Create a hexagon
 $('#bPolygon').click(function(options) {
+	turnOffLine();
 	var points=regularPolygonPoints(6,30);
 	poly = new fabric.Polygon(points, {
 		id: makeid(),
@@ -367,6 +382,7 @@ $('#bPolygon').click(function(options) {
 
 //Create a star
 $('#bStar').click(function(options) {
+	turnOffLine();
 	var points=regularStarPoints(6,30);
 	poly = new fabric.Polygon(points, {
 		id: makeid(),
@@ -384,6 +400,7 @@ $('#bStar').click(function(options) {
 
 //Delete selected objects
 $('#bDelete').click(function(options) {
+	turnOffLine();
 	var selected = canvas.getActiveObjects(),
 	selGroup = new fabric.ActiveSelection(selected, {canvas: canvas});
 	if (selGroup) {
@@ -397,6 +414,7 @@ $('#bDelete').click(function(options) {
 
 //Sync you vector with cloud
 $('#bSync').click(function(options) {
+	turnOffLine();
 	showProgressBar();
 	db.collection('projects').doc(projectName)
 		.collection('svg').add({
@@ -421,6 +439,7 @@ $('#bSync').click(function(options) {
 
 //Save canvas as png
 $('#bSave').click(function(options) {
+	turnOffLine();
 	let time = new Date().getTime();
 	$('#mCanvas').get(0).toBlob(blob =>{
 		saveAs(blob,time+'.png');
