@@ -31,7 +31,7 @@ var strokeColorPicker = document.getElementById("strokeColor");
 var fillColorPicker = document.getElementById("fillColor");
 
 var rect, circle, poly;
-
+var isDown, continueSelection;
 var mCommitHtml;
 
 function displayCommit(commit){
@@ -254,6 +254,38 @@ canvas.on('object:selected', onObjectSelected);
 canvas.on('selection:updated', onObjectSelected);
 canvas.on('selection:cleared', onObjectSelectionCleared);
 
+//Drawing a line
+canvas.on('mouse:down', function(o){
+	continueSelection = true
+	if(isDown && continueSelection){
+		var pointer = canvas.getPointer(o.e);
+		var points = [ pointer.x, pointer.y, pointer.x, pointer.y ];
+		line = new fabric.Line(points, {
+				id: makeid(),
+				fill: '#FFFFFF',
+				stroke: '#000000',
+				strokeWidth: 2,
+				selectable: false,
+				strokeLineJoin: 'bevil'
+			},	false);
+		canvas.add(line);
+	}
+  });
+  
+canvas.on('mouse:move', function(o){
+		if (isDown && continueSelection){
+			var pointer = canvas.getPointer(o.e);
+			line.set({ x2: pointer.x, y2: pointer.y });
+			canvas.renderAll();
+		}
+  });
+
+canvas.on('mouse:up', function(o){
+	continueSelection = false;
+	line.setCoords();
+  });
+
+
 //Create a rectangle
 $('#bSquare').click(function(options) {
   	rect = new fabric.Rect({
@@ -306,20 +338,14 @@ $('#bTriangle').click(function(options) {
 
 //Create a line
 $('#bLine').click(function(options) {
-	var points=regularPolygonPoints(2,30);
-	poly = new fabric.Line([20, 50, 80, 50], {
-		id: makeid(),
-		fill: '#FFFFFF',
-		stroke: '#000000',
-		left: 50,
-		top: 50,
-		lockScalingY: true,
-		strokeWidth: 2,
-		strokeLineJoin: 'bevil'
-	},	false);
-	console.log(poly);
-	canvas.add(poly);
-	canvas.renderAll();
+	if(isDown) {
+		canvas.selection = true; isDown = false; 
+		canvas.forEachObject(object => object.set({selectable:true}))
+	}
+	else {
+		canvas.selection = false; isDown = true;
+		canvas.forEachObject(object => object.set({selectable:false}))
+	}
 });
 
 //Create a hexagon
@@ -372,66 +398,6 @@ $('#bDelete').click(function(options) {
 //Sync you vector with cloud
 $('#bSync').click(function(options) {
 	showProgressBar();
-	// var svgsRef = db.collection('projects')
-	// .doc(projectName).collection('svg');
-	// svgsRef.orderBy("timestamp", "desc").limit(1)
-	// .get()
-	// .then(results =>{
-	// 	if(results.empty){
-	// 		hideProgressBar();
-	// 		console.log('No data found');
-	// 	} else {
-	// 		var fetchedJson = results.docs[0].data().json;
-	// 		if(results.docs[0].data().timestamp == mTimestamp){
-	// 			//We are working on latest commit
-	// 				db.collection('projects').doc(projectName)
-	// 					.collection('svg').add({
-	// 						username: userName,
-	// 						json: canvas.toJSON({suppressPreamble: true}),
-	// 						xml: canvas.toSVG({suppressPreamble: true}),
-	// 						timestamp: new Date().getTime()
-	// 					})
-	// 					.then(doc =>{
-	// 						hideProgressBar();
-	// 						showToastSynced();
-	// 						console.log('Synced successfully')
-	// 					})
-	// 					.catch(error =>{
-	// 						hideProgressBar();
-	// 						showToastSyncError();
-	// 						console.log('Error syncing: ',error)
-	// 					})
-	// 		} else{
-	// 			//We are working on outdated commit
-	// 			var resJson = mergeAdvanced(fetchedJson, canvas.toJSON({suppressPreamble: true})
-	// 				,{
-	// 					cb: (inputArg1, inputArg2, resultAboutToBeReturned, infoObj) => {
-	// 					  if (typeof inputArg1 === "boolean" && typeof inputArg2 === "boolean") {
-	// 						return inputArg2;
-	// 					  	}
-	// 					  return resultAboutToBeReturned;
-	// 					}
-	// 				})
-	// 			console.log(resJson)
-	// 			canvas.loadFromJson(resJson)
-	// 					showToast('Latest commit fetched !!');
-	// 					hideProgressBar();
-	// 				// fabric.loadSVGFromString(strSvg, function(objects, options){
-	// 				// 	objects.forEach(svg =>{
-	// 				// 		canvas.add(svg).renderAll();
-	// 				// 	});
-	// 				// 	showToast('Latest commit fetched !!');
-	// 				// 	hideProgressBar();
-	// 				// });
-	// 		}			
-	// 	}
-	// })
-	// .catch(error =>{
-	// 	showToast('Error reaching servers !!');
-	// 	hideProgressBar();
-	// 	console.log('Error fetching existing xml', error);
-	// })
-
 	db.collection('projects').doc(projectName)
 		.collection('svg').add({
 			username: userName,
