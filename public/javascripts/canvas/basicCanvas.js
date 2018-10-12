@@ -358,8 +358,13 @@ $('#bTriangle').click(function(options) {
 
 //Create a line
 $('#bLine').click(function(options) {
-	turnOffLine();
-	turnOnLine();
+	if(isDown){
+		canvas.selection = true; isDown = false; 
+		canvas.forEachObject(object => object.set({selectable:true}))
+	} else{
+		canvas.selection = false; isDown = true;
+		canvas.forEachObject(object => object.set({selectable:false}))
+	}
 });
 
 //Create a hexagon
