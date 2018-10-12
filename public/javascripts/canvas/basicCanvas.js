@@ -270,7 +270,7 @@ canvas.on('selection:cleared', onObjectSelectionCleared);
 
 //Drawing a line
 canvas.on('mouse:down', function(o){
-	continueSelection = true
+	if(isDown) continueSelection = true
 	if(isDown && continueSelection){
 		var pointer = canvas.getPointer(o.e);
 		var points = [ pointer.x, pointer.y, pointer.x, pointer.y ];
