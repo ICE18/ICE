@@ -23,13 +23,22 @@ function makeid() {
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.render('index', { title: 'ICE-Home', isUser: false });
+	console.log('default\n');
+  res.render('index', { title: 'ICE-Home'});
 });
 
-router.get('/:uname/:status', function(req, res, next) {
-	var status = req.params.status
+router.get('/:uname/', function(req, res, next) {
 	var uname = req.params.uname
-  res.render('index', { title: 'ICE-Home', isUser: status, uname: uname });
+	const projects = [];
+	db.collection('projects').get().then(function(querySnapshot) {
+		querySnapshot.forEach(function(doc) {
+			projects.push(doc.data().name);
+		})
+		console.log("in\n");
+		console.log(projects);
+		res.render('index', { title: 'ICE-Home', uname: uname, projects: projects });
+		console.log('rendered\n');
+	})
 });
 
 router.get('/editor/:id/:projectName/:username', function(req, res, next){
@@ -81,7 +90,7 @@ router.post('/submitHomeUserName', function(req, res, next){
 			//User exists, redirect to get projectname
 			querySnapshot.forEach(function(doc) {
 				console.log(doc.id, " => ", doc.data());
-				res.redirect('/'+uname+'/'+true)
+				res.redirect('/'+uname)
 			});
 		} else {
 			//User does not exist, create one
