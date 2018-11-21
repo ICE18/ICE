@@ -5,14 +5,14 @@
 		<div class="list">
 		{{#each projects}}
 			<p>
-				<label><input type="radio" name="pname">
+				<label><input type="radio" name="pname" value="{{this}}">
 				<span>{{this}}</span>
 				</label>
 			</p>
 		{{/each}}
 		</div>
 		<button type="submit" class="btn btn-primary btn-block btn-large">Let me in.</button>
-		<input type="text" id="usernameHidded" name="username" value={{uname}} />
+		<input type="text" id="usernameHidden" name="username" value={{uname}} />
 		</form>
 </div>
 
