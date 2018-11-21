@@ -33,6 +33,7 @@ var fillColorPicker = document.getElementById("fillColor");
 var rect, circle, poly;
 var isDown = false, continueSelection = false;
 var mCommitHtml;
+var mTemplateHtml;
 
 function displayCommit(commit){
 	if(commit.exists){
@@ -49,21 +50,6 @@ function displayCommit(commit){
 		 '<p>'+commit.data().username+'</p>'+
 		 '<p>'+commit.data().timestamp+'</p>'+
 		 '</div>'+
-		 '</div>'
-	}
-}
-
-function displayTemplate(commit){
-	if(commit.exists){
-
-		let mXml = commit.data().xml
-
-		mXml = mXml.replace('width=','width="280"');
-		mXml = mXml.replace('height=','height="210"');
-		// mXml = mXml.replace('viewBox=',' preserveAspectRatio="xMidYMid meet" viewBox="0 0 900 900"')
-
-		mTemplateHtml+= '<div class="card-horizontal">'+
-		 mXml+
 		 '</div>'
 	}
 }
@@ -90,13 +76,27 @@ function getAllCommits(){
 	})
 };
 
+function displayTemplate(template){
+	if(template.exists){
+		console.log("Data is the: "+template.data().svg)
+		let mXml = template.data().svg
+		mXml = mXml.replace('width=','width="280"');
+		mXml = mXml.replace('height=','height="210"');
+		// mXml = mXml.replace('viewBox=',' preserveAspectRatio="xMidYMid meet" viewBox="0 0 900 900"')
+		mTemplateHtml+= '<div class="card-horizontal">'+
+		 mXml+
+		 '</div>'
+	}
+}
+
 function getAllTemplates(){
 	db.collection('templates')
-	.doc()
 	.get()
-	.then(querySnapshot => {
-			querySnapshot.forEach(displayTemplate)
-			document.getElementById("templates").innerHTML = mTemplateHtml;		
+	.then(function(querySnapshot){
+		querySnapshot.forEach(function(doc){
+			displayTemplate(doc)
+			document.getElementById("templates").innerHTML = mTemplateHtml;
+		})
 	})
 };
 
@@ -222,12 +222,10 @@ function getExistingXml(){
 	.get()
 	.then(results =>{
 		if(results.empty){
-			console.log('No data found');
 			hideProgressBar();
 		} else {
 			var strSvg = results.docs[0].data().xml
 			mTimestamp = results.docs[0].data().timestamp
-			console.log('svgData: ',strSvg);
 			fabric.loadSVGFromString(strSvg, function(objects, options){
 				objects.forEach(svg =>{
 					canvas.add(svg).renderAll();
@@ -253,11 +251,9 @@ function getExistingXmlPreview(){
 	.get()
 	.then(results =>{
 		if(results.empty){
-			console.log('No data found');
 			hideProgressBar();
 		} else {
 			var strSvg = results.docs[0].data().xml
-			console.log('svgData: ',strSvg);
 			fabric.loadSVGFromString(strSvg, function(objects, options){
 				objects.forEach(svg =>{
 					prevCanvas.add(svg).renderAll();
@@ -333,6 +329,7 @@ function turnOnLine(){
 getExistingXml();
 listenToLatestChanges();
 getAllCommits();
+getAllTemplates();
 
 
 //Listen for object selected
