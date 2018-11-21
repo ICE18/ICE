@@ -23,22 +23,13 @@ function makeid() {
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-	console.log('default\n');
-  res.render('index', { title: 'ICE-Home'});
+  res.render('index', { title: 'ICE-Home', isUser: false });
 });
 
-router.get('/:uname/', function(req, res, next) {
+router.get('/:uname/:status', function(req, res, next) {
+	var status = req.params.status
 	var uname = req.params.uname
-	const projects = [];
-	db.collection('projects').get().then(function(querySnapshot) {
-		querySnapshot.forEach(function(doc) {
-			projects.push(doc.data().name);
-		})
-		console.log("in\n");
-		console.log(projects);
-		res.render('index', { title: 'ICE-Home', uname: uname, projects: projects });
-		console.log('rendered\n');
-	})
+  res.render('index', { title: 'ICE-Home', isUser: status, uname: uname });
 });
 
 router.get('/editor/:id/:projectName/:username', function(req, res, next){
@@ -90,7 +81,7 @@ router.post('/submitHomeUserName', function(req, res, next){
 			//User exists, redirect to get projectname
 			querySnapshot.forEach(function(doc) {
 				console.log(doc.id, " => ", doc.data());
-				res.redirect('/'+uname)
+				res.redirect('/'+uname+'/'+true)
 			});
 		} else {
 			//User does not exist, create one
@@ -224,6 +215,7 @@ function projectDoesNotExist(res,pname, uname, pid){
 router.post('/submitHomeProjectName', function(req, res, next){
 	var pname = req.body.pname;
 	var uname = req.body.username;
+	console.log("U:" + uname + "|P:" + pname)
 	var pid = makeid();
 
 	//Checking if project exists or not (if exists redirect, else create one)
@@ -240,6 +232,21 @@ router.post('/submitHomeProjectName', function(req, res, next){
     .catch(function(error) {
         console.log("Error creating project: ", error);
     });
+});
+
+router.post('/projects/select', function(req, res, next) {
+	var uname = req.body.username
+	console.log(uname);
+	const projects = [];
+	db.collection('projects').get().then(function(querySnapshot) {
+		querySnapshot.forEach(function(doc) {
+			projects.push(doc.data().name);
+		})
+		console.log("in\n");
+		console.log(projects);
+		res.render('index2', { title: 'ICE-Home', uname: uname, projects: projects });
+		console.log('rendered\n');
+	})
 });
 
 module.exports = router;
