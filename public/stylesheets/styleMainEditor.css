@@ -1,5 +1,5 @@
 #mainScreen {
-    height: 100vh;
+    height: 620px;
 }
 
 #editor{
@@ -11,7 +11,7 @@
 #mToolbar{
 	padding: 10px 25px 0px 25px;
     background: gray;
-    height: inherit;
+    height: 600px;
 }
 
 #mOptionsToolbar{
@@ -30,9 +30,9 @@
 #commits {
     float: right;
     background: darkslategray;
-    width: 250px;
+    width: 320px;
     height: inherit;
-    overflow: scroll;
+    overflow-y: scroll;
 }
 
 .center {
@@ -168,7 +168,8 @@ legend {
     display:none;
     position:fixed;
     border:1px solid #B2B2B2;
-    width:150px;      background:#F9F9F9;
+    width:150px;
+    background:#F9F9F9;
     box-shadow: 3px 3px 2px #E9E9E9;
     border-radius:4px;
   }

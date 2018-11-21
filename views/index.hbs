@@ -2,23 +2,16 @@
 <div class="enter">
 	<h1>ICE</h1>
     
-		{{#if uname}}
-			<form action="/submitHomeProjectName" method="POST">
-				<h2>Projects available</h2>>
-				<div id="new-block">
-					<button class="btn btn-info btn-block btn-md" data-toggle="collapse" data-target="#new">Add new</button>
-					<div id="new" class="collapse">
-						<input type="text" name="pname" placeholder="Project Name" required="required" />
-						<button type="submit" class="btn btn-primary btn-block btn-large">Let me in.</button>
-					</div>
-				</div>
-				<div id="projects">
-				{{#each projects}}
-					<button class="btn btn-info btn-block btn-md" name="pname" value="{{this}}">{{this}}</button>
-				{{/each}}
-				</div>
-				<input type="text" id="usernameHidden" name="username" value={{uname}} />
-			</form>
+		{{#if isUser }}
+		<form action="/submitHomeProjectName" method="POST">
+		<input type="text" name="pname" placeholder="Project Name" required="required" />
+		<button type="submit" class="btn btn-primary btn-block btn-large">Let me in.</button>
+		<input type="text" id="usernameHidden" name="username" value={{uname}} />
+		</form>
+		<form action="/projects/select" method="POST">
+		<button type="submit" class="btn btn-primary btn-block btn-large">Choose a project.</button>
+		<input type="text" id="usernameHidden" name="username" value={{uname}} />
+		</form>
 		{{else}}
 		<form action="submitHomeUserName" method="POST">
 		<input type="text" name="uname" placeholder="Username" required="required" />
