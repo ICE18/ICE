@@ -53,6 +53,21 @@ function displayCommit(commit){
 	}
 }
 
+function displayTemplate(commit){
+	if(commit.exists){
+
+		let mXml = commit.data().xml
+
+		mXml = mXml.replace('width=','width="280"');
+		mXml = mXml.replace('height=','height="210"');
+		// mXml = mXml.replace('viewBox=',' preserveAspectRatio="xMidYMid meet" viewBox="0 0 900 900"')
+
+		mTemplateHtml+= '<div class="card-horizontal">'+
+		 mXml+
+		 '</div>'
+	}
+}
+
 $("card").click(function(){
 	if (confirm("Render it here?")){
 		$("#bsync").trigger("click");
@@ -73,7 +88,17 @@ function getAllCommits(){
 			querySnapshot.forEach(displayCommit)
 			document.getElementById("commits").innerHTML = mCommitHtml; 
 	})
-}
+};
+
+function getAllTemplates(){
+	db.collection('templates')
+	.doc()
+	.get()
+	.then(querySnapshot => {
+			querySnapshot.forEach(displayTemplate)
+			document.getElementById("templates").innerHTML = mTemplateHtml;		
+	})
+};
 
 function listenToLatestChanges(){
 	db.collection('projects')
@@ -98,6 +123,42 @@ function listenToLatestChanges(){
 										'</div>';
 
 						document.getElementById("commits").innerHTML = mCommit + mCommitHtml;
+						mCommitHtml = mCommit + mCommitHtml; 
+
+						//Displaying toast on new commit
+						if(change.doc.data().username == userName){
+							//Do nothing
+						} else{
+							showToast(change.doc.data().username+' made some changes !!')
+						}
+					}
+				});
+			})
+}
+
+function listenToLatestChanges(){
+	db.collection('projects')
+		.doc(projectName).collection('svg').where("timestamp",">",mTimestamp)
+			.onSnapshot(snapshot =>{
+				snapshot.docChanges().forEach(function(change) {
+					if (change.type === "added") {
+						
+						let mXml = change.doc.data().xml
+
+						mXml = mXml.replace('width=','width="280"');
+						mXml = mXml.replace('height=','height="210"');
+						// mXml = mXml.replace('viewBox=','viewBox="0 0  1000"')
+						
+						//Adding Commits to list
+						var mCommit = '<div class="card">'+
+										mXml+
+										'<div class="container">'+
+										'<p>'+change.doc.data().username+'</p>'+
+										'<p>'+change.doc.data().timestamp+'</p>'+
+										'</div>'+
+										'</div>';
+
+						document.getElementById("templates").innerHTML = mCommit + mCommitHtml;
 						mCommitHtml = mCommit + mCommitHtml; 
 
 						//Displaying toast on new commit
